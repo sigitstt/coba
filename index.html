@@ -87,6 +87,13 @@
             background-color: #fff;
         }
 
+        .form-group select {
+            padding: 6px 8px;
+            font-size: 12px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
         .btn-start {
             width: 100%;
             padding: 10px;
@@ -220,7 +227,14 @@
             background-color: #A00101;
         }
 
-        /* Modal / Popup Ubah Password Guru */
+        .sending-status {
+            font-size: 13px;
+            color: #555;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        /* Modal / Popup Ubah Password & Pengaturan Guru */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -239,7 +253,7 @@
             padding: 20px;
             border-radius: 12px;
             width: 85%;
-            max-width: 320px;
+            max-width: 340px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             text-align: left;
         }
@@ -251,24 +265,10 @@
             text-align: center;
         }
 
-        .modal-content label {
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .modal-content input {
-            width: 100%;
-            padding: 6px;
-            margin-top: 2px;
-            margin-bottom: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
         .modal-buttons {
             display: flex;
             gap: 10px;
-            margin-top: 10px;
+            margin-top: 15px;
         }
 
         .btn-modal {
@@ -278,20 +278,28 @@
             border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
+        }
+
+        .btn-modal-save {
+            background-color: #055205;
             color: white;
         }
 
-        .btn-modal-save { background-color: #055205; }
-        .btn-modal-cancel { background-color: #A00101; }
+        .btn-modal-cancel {
+            background-color: #A00101;
+            color: white;
+        }
     </style>
 </head>
 <body>
 
     <!-- HALAMAN AWAL (FORM IDENTITAS) -->
     <div class="start-screen" id="startScreen">
-        <h1 id="gameTitle">GUmo Nulis Jawa</h1>
+        <!-- Judul diberi ID untuk deteksi 5 kali ketukan -->
+        <h1 id="gameTitle">Game Nulis Jawa</h1>
         <h2>Isi Identitas & Pilih Level</h2>
         <form id="studentForm">
+            <!-- 1. Nomor Absen Dropdown -->
             <div class="form-group">
                 <label for="studentAbsen">1. Nomor Absen:</label>
                 <select id="studentAbsen" required>
@@ -304,11 +312,13 @@
                 </select>
             </div>
 
+            <!-- 2. Nama Lengkap Input -->
             <div class="form-group">
                 <label for="studentName">2. Nama Lengkap:</label>
                 <input type="text" id="studentName" placeholder="Masukkan nama..." required>
             </div>
 
+            <!-- 3. Kelas Dropdown -->
             <div class="form-group">
                 <label for="studentKelas">3. Kelas:</label>
                 <select id="studentKelas" required>
@@ -325,6 +335,7 @@
                 </select>
             </div>
 
+            <!-- 4. Level Game Dropdown -->
             <div class="form-group">
                 <label for="studentLevel">4. Level Game:</label>
                 <select id="studentLevel" required>
@@ -340,6 +351,7 @@
                 </select>
             </div>
 
+            <!-- 5. Jenis Tes Dropdown -->
             <div class="form-group">
                 <label for="studentMode">5. Jenis Tes:</label>
                 <select id="studentMode" onchange="togglePasswordInput()" required>
@@ -348,6 +360,7 @@
                 </select>
             </div>
             
+            <!-- 6. Token Ujian (Hidden by Default) -->
             <div class="form-group" id="passContainer" style="display: none;">
                 <label for="teacherPass">6. Token Ujian (Dari Guru):</label>
                 <input type="password" id="teacherPass" placeholder="Masukkan token guru...">
@@ -365,67 +378,85 @@
             <span id="score">Skor: 0</span>
         </div>
 
+        <!-- Soal Latin -->
         <div class="output1" id="latinWord">-</div>
+        
+        <!-- Input Jawaban Jawa -->
         <div class="output2" id="jawaWord"></div>
+
+        <!-- Papan Tombol Aksara -->
         <div class="game-board" id="jawaBoard"></div>
 
+        <!-- Tombol Kontrol Bawah -->
         <div class="controls">
-            <button class="control-button shift" id="shiftButton">SHIFT 1</button>
+            <button class="control-button shift" id="shiftButton">SHIFT 2</button>
             <button class="control-button delete" id="deleteButton">GOSOK</button>
             <button class="control-button confirm" id="confirmButton">KIRIM</button>   
         </div>
     </div>
 
-    <!-- POPUP MODAL PENGATURAN GURU -->
-    <div id="passwordModal" class="modal-overlay">
+    <!-- POPUP / MODAL UBAH PENGATURAN GURU -->
+    <div class="modal-overlay" id="passwordModal">
         <div class="modal-content">
             <h3>⚙️ Pengaturan Guru</h3>
-            
-            <label>Password Guru Saat Ini:</label>
-            <input type="password" id="oldPassInput" placeholder="Masukkan password lama">
-
-            <label>Password Sumatif Baru (Opsional):</label>
-            <input type="password" id="newPassInput" placeholder="Biarkan kosong jika tidak diganti">
-
-            <label>Batas Waktu Per Level (Detik):</label>
-            <input type="number" id="gameTimerInput" placeholder="60">
-
-            <label>Jumlah Soal Per Game:</label>
-            <input type="number" id="totalQuestionsInput" placeholder="10">
-
+            <div class="form-group">
+                <label for="oldPassInput">Password Lama Saat Ini:</label>
+                <input type="password" id="oldPassInput" placeholder="Masukkan password lama...">
+            </div>
+            <div class="form-group">
+                <label for="newPassInput">Password Sumatif Baru (Opsional):</label>
+                <input type="password" id="newPassInput" placeholder="Biarkan kosong jika tidak diubah">
+            </div>
+            <div class="form-group">
+                <label for="gameTimerInput">Batas Waktu Game (Detik):</label>
+                <input type="number" id="gameTimerInput" placeholder="Contoh: 60">
+            </div>
+            <div class="form-group">
+                <label for="totalQuestionsInput">Jumlah Soal Per Permainan:</label>
+                <input type="number" id="totalQuestionsInput" placeholder="Contoh: 10">
+            </div>
             <div class="modal-buttons">
-                <button class="btn-modal btn-modal-save" id="savePassBtn">Simpan</button>
                 <button class="btn-modal btn-modal-cancel" id="cancelPassBtn">Batal</button>
+                <button class="btn-modal btn-modal-save" id="savePassBtn">Simpan</button>
             </div>
         </div>
     </div>
 
- <script>
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxbs9ayFpAOwJTj7WX4GPNtFreJDXZfDuOFHSnIub9BBvN1WaJhaLDF46SVDhY5lRbt/exec";
-        let TOKEN_SUMATIF = "JAWA2026";
-        let activePassword = "JAWA2026";
-        let GAME_TIMER = 60;        
-        let TOTAL_SOAL_GAME = 10;   
-     
+    <script>
+        // === TEMPELKAN URL APPS SCRIPT ANDA DI SINI ===
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzjVVIpurSinGdM7dv9_pkSnBhcqZakgKg1SS1fdLrtNi-7gkscWU-7B9SFS8b2Y4Z/exec";
+        
+        let TOKEN_SUMATIF = "JAWA2026"; // Default sementara
+        let activePassword = "JAWA2026"; 
+        let GAME_TIMER = 60;          // Waktu default (detik)[cite: 3]
+        let TOTAL_SOAL_GAME = 10;     // Max soal default per game[cite: 3]
+        
+        // Fungsi Sinkronisasi Pengaturan (Password, Waktu, Jumlah Soal) dari Cloud Google Sheet[cite: 3]
         function syncSettingsFromCloud() {
             fetch(GOOGLE_SCRIPT_URL)
                 .then(response => response.json())
                 .then(data => {
-                    if (data && data.result === "success") {
-                        TOKEN_SUMATIF = data.password || TOKEN_SUMATIF;
-                        activePassword = data.password || activePassword;
-                        GAME_TIMER = Number(data.waktu) || GAME_TIMER;
-                        TOTAL_SOAL_GAME = Number(data.jumlahSoal) || TOTAL_SOAL_GAME;
-                        
-                        document.getElementById("gameTimerInput").value = GAME_TIMER;
-                        document.getElementById("totalQuestionsInput").value = TOTAL_SOAL_GAME;
+                    if (data) {
+                        if (data.password) {
+                            TOKEN_SUMATIF = String(data.password);
+                            activePassword = String(data.password);
+                        }
+                        if (data.waktu && !isNaN(data.waktu)) {
+                            GAME_TIMER = Number(data.waktu);
+                        }
+                        if (data.jumlahSoal && !isNaN(data.jumlahSoal)) {
+                            TOTAL_SOAL_GAME = Number(data.jumlahSoal);
+                        }
+                        console.log("Pengaturan Cloud berhasil dimuat:", { TOKEN_SUMATIF, GAME_TIMER, TOTAL_SOAL_GAME });
                     }
                 })
-                .catch(err => console.log("Memakai setting default."));
+                .catch(err => console.log("Gagal mengambil pengaturan dari cloud. Menggunakan setting default/cache."));
         }
+        
+        // Panggil fungsi sinkronisasi saat halaman pertama kali dibuka
         window.addEventListener("DOMContentLoaded", syncSettingsFromCloud);
 
-        // Secret Admin Tap Header
+        // --- FITUR KETUK JUDUL 5 KALI (SECRET ADMIN POPUP) ---
         let titleTapCount = 0;
         let tapTimer = null;
         const gameTitle = document.getElementById("gameTitle");
@@ -434,41 +465,59 @@
         gameTitle.addEventListener("click", () => {
             titleTapCount++;
             clearTimeout(tapTimer);
+
             if (titleTapCount === 5) {
                 titleTapCount = 0;
+                // Buka popup & isi nilai awal pada form input modal[cite: 3]
                 document.getElementById("oldPassInput").value = "";
                 document.getElementById("newPassInput").value = "";
+                document.getElementById("gameTimerInput").value = GAME_TIMER;
+                document.getElementById("totalQuestionsInput").value = TOTAL_SOAL_GAME;
                 passwordModal.style.display = "flex";
             } else {
-                tapTimer = setTimeout(() => { titleTapCount = 0; }, 1500);
+                // Reset hitungan jika jeda mengetuk lebih dari 1.5 detik
+                tapTimer = setTimeout(() => {
+                    titleTapCount = 0;
+                }, 1500);
             }
         });
 
+        // Tombol Simpan Pengaturan Baru (Password, Waktu, & Jumlah Soal ke Apps Script)[cite: 3]
         document.getElementById("savePassBtn").addEventListener("click", () => {
             const oldPass = document.getElementById("oldPassInput").value.trim();
             const newPass = document.getElementById("newPassInput").value.trim();
             const newTime = document.getElementById("gameTimerInput").value.trim();
             const newQuestions = document.getElementById("totalQuestionsInput").value.trim();
-        
+
+            // Verifikasi password lama
             if (oldPass !== TOKEN_SUMATIF && oldPass !== activePassword) {
-                alert("❌ Password lama salah!");
+                showAlert("❌ Password lama salah!");
                 return;
             }
-        
+
             if (!newTime || !newQuestions || Number(newTime) <= 0 || Number(newQuestions) <= 0) {
-                alert("⚠️ Waktu dan Jumlah Soal harus diisi dengan angka positif!");
+                showAlert("⚠️ Batas waktu dan jumlah soal harus diisi angka positif!");
                 return;
             }
-        
+
+            // Tampilkan info sedang menyimpan
+            showAlert("⏳ Sedang memperbarui pengaturan ke Cloud Server...");
+
             const formData = new URLSearchParams();
             formData.append("action", "update_settings");
             formData.append("new_password", newPass !== "" ? newPass : activePassword);
             formData.append("new_waktu", newTime);
             formData.append("new_jumlah_soal", newQuestions);
-        
-            fetch(GOOGLE_SCRIPT_URL, { method: "POST", body: formData })
-            .then(res => res.json())
-            .then(data => {
+
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: formData.toString()
+            })
+            .then(() => {
                 if (newPass !== "") {
                     TOKEN_SUMATIF = newPass;
                     activePassword = newPass;
@@ -476,240 +525,519 @@
                 GAME_TIMER = Number(newTime);
                 TOTAL_SOAL_GAME = Number(newQuestions);
 
-                alert("✅ Pengaturan berhasil diperbarui!");
+                showAlert("✅ Pengaturan (Password, Waktu, Soal) berhasil diperbarui secara ONLINE!");
+                
+                // Bersihkan input dan tutup modal
+                document.getElementById("oldPassInput").value = "";
+                document.getElementById("newPassInput").value = "";
                 passwordModal.style.display = "none";
             })
             .catch(err => {
-                alert("❌ Gagal menyimpan ke cloud.");
+                showAlert("❌ Gagal memperbarui pengaturan ke server. Periksa koneksi internet.");
+                console.error("Error:", err);
             });
         });
 
+        // Tombol Batal Modal
         document.getElementById("cancelPassBtn").addEventListener("click", () => {
             passwordModal.style.display = "none";
         });
 
+        // Tampilkan/Sembunyikan Input Token Sumatif
         function togglePasswordInput() {
             const mode = document.getElementById("studentMode").value;
-            document.getElementById("passContainer").style.display = (mode === "Sumatif") ? "block" : "none";
+            const passContainer = document.getElementById("passContainer");
+            if (mode === "Sumatif") {
+                passContainer.style.display = "block";
+            } else {
+                passContainer.style.display = "none";
+            }
+        }
+        
+        // --- WEB AUDIO API ---
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
         }
 
-        // Web Audio API
-        let audioCtx = null;
-        function initAudio() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-        }
         function playSoundTombol() {
-            initAudio(); if (!audioCtx) return;
-            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.type = 'sine'; osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+            initAudio();
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
             gain.gain.setValueAtTime(0.6, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
         }
+
         function playSoundHapus() {
-            initAudio(); if (!audioCtx) return;
-            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.type = 'triangle'; osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+            initAudio();
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(300, audioCtx.currentTime);
             gain.gain.setValueAtTime(0.7, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.08);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.08);
         }
+
         function playSoundBenar() {
-            initAudio(); if (!audioCtx) return;
-            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.type = 'sine'; osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
-            osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1);
+            initAudio();
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); 
+            osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); 
             gain.gain.setValueAtTime(0.7, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
         }
+
         function playSoundSalah() {
-            initAudio(); if (!audioCtx) return;
-            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            initAudio();
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
             gain.gain.setValueAtTime(0.6, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.25);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.25);
         }
 
-        // Keyboards Aksara Jawa (Shift 1, 2, 3)
-        const keyboardPages = [
-            ["ꦲ","ꦤ","ꦕ","ꦫ","ꦏ","ꦢ","ꦠ","ꦱ","ꦮ","ꦭ","ꦥ","ꦝ","ꦗ","ꦩ","ꦒ","ꦧ","ꦛ","ꦔ","ꦚ","꧀"],
-            ["ꦶ","ꦸ","ꦺ","ꦺꦴ","ꦼ","ꦁ","ꦂ","ꦃ","ꦾ","ꦿ","ꦽ","꧀","ꦄ","ꦆ","ꦈ","ꦌ","ꦎ","ꦑ","ꦡ","ꦦ"],
-            ["ꦯ","ꦓ","ꦨ","ꦟ","ꦞ","ꦰ","꦳","꧑","꧒","꧓","꧔","꧕","꧖","꧗","꧘","꧙","꧀","꧞","꧟"," "]
+        function playSoundGameOver() {
+            initAudio();
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.6);
+            gain.gain.setValueAtTime(0.8, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.6);
+        }
+
+        function playSoundFinish() {
+            initAudio();
+            if (!audioCtx) return;
+            const notes = [523.25, 659.25, 783.99, 1046.50];
+            notes.forEach((freq, index) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime + (index * 0.1));
+                gain.gain.setValueAtTime(0.7, audioCtx.currentTime + (index * 0.1));
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + (index * 0.1) + 0.2);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(audioCtx.currentTime + (index * 0.1));
+                osc.stop(audioCtx.currentTime + (index * 0.1) + 0.2);
+            });
+        }
+
+        function triggerPressAnimation(element) {
+            element.classList.add("pressed");
+            setTimeout(() => {
+                element.classList.remove("pressed");
+            }, 100);
+        }
+
+        // --- DATABASE SOAL 8 LEVEL ---
+        const levelData = {
+            "Level 1": {
+                latin: ["AJA", "ALA", "ANA", "AMA", "APA", "HAWA", "NATA", "NAWALA", "NAGA", "NARAKA"],
+                jawa:  ["ꦲꦗ", "ꦲꦭ", "ꦲꦤ", "ꦲꦩ", "ꦲꦥ", "ꦲꦮ", "ꦤꦠ", "ꦤꦮꦭ", "ꦤꦒ", "ꦤꦫꦏ"]
+            },
+            "Level 2": {
+                latin: ["ULA", "ULI", "UPA", "UJA", "UJI", "UGA", "UGI", "ECA", "EKA", "EWA"],
+                jawa:  ["ꦲꦸꦭ", "ꦲꦸꦭꦶ", "ꦲꦸꦥ", "ꦲꦸꦗ", "ꦲꦸꦗꦶ", "ꦲꦸꦒ", "ꦲꦸꦒꦶ", "ꦲꦺꦕ", "ꦲꦺꦏ", "ꦲꦺꦮ"]
+            },
+            "Level 3": {
+                latin: ["INGKANG", "UNGGAH-UNGGUH", "ANGGUR", "ARGA", "AHLI", "ARTA", "HARJA", "ASAH", "ARWAH", "AKEH"],
+                jawa:  ["ꦲꦶꦁꦏꦁ", "ꦲꦸꦁꦒꦃꦲꦸꦁꦒꦸꦃ", "ꦲꦁꦒꦸꦂ", "ꦲꦂꦒ", "ꦲꦃꦭꦶ", "ꦲꦂꦠ", "ꦲꦂꦗ", "ꦲꦱꦃ", "ꦲꦂꦮꦃ", "ꦲꦏꦺꦃ"]
+            },
+            "Level 4": {
+                latin: ["ABDI", "ABJAD", "ABSEN", "AKSAMA", "ALMARHUM", "ALPOKAT", "AMBA", "AMBAL", "AMBEN", "AMBER"],
+                jawa:  ["ꦲꦧ꧀ꦢꦶ", "ꦲꦧ꧀ꦗꦢ꧀", "ꦲꦧ꧀ꦱꦺꦤ꧀", "ꦲꦏ꧀ꦱꦩ", "ꦲꦭ꧀ꦩꦂꦲꦸꦩ꧀", "ꦲꦭ꧀ꦥꦺꦴꦏꦠ꧀", "ꦲꦩ꧀ꦧ", "ꦲꦩ꧀ꦧꦭ꧀", "ꦲꦩ꧀ꦧꦺꦤ꧀", "ꦲꦩ꧀ꦧꦺꦂ"]
+            },
+            "Level 5": {
+                latin: ["AMBROL", "AMBRUK", "AMBYAR", "AMBYUR", "AMBYUK", "AMRIH", "AMPYANG", "ANGGREK", "ANGKRUK", "ANGKRING"],
+                jawa:  ["ꦲꦩ꧀ꦧꦿꦺꦴꦭ꧀", "ꦲꦩ꧀ꦧꦿꦸꦏ꧀", "ꦲꦩ꧀ꦧꦾꦂ", "ꦲꦩ꧀ꦧꦾꦸꦂ", "ꦲꦩ꧀ꦧꦾꦸꦏ꧀", "ꦲꦩꦿꦶꦃ", "ꦲꦩ꧀ꦥꦾꦁ", "ꦲꦁꦒꦿꦺꦏ꧀", "ꦲꦁꦏꦿꦸꦏ꧀", "ꦲꦁꦏꦿꦶꦁ"]
+            },
+            "Level 6": {
+                latin: ["BASUKI", "AMERIKA", "BAYU", "BAGAS", "ARAB", "BINTANG", "CANDRA", "ARGENTINA", "CANDRALUKITA", "COKRO"],
+                jawa:  ["ꦨꦱꦸꦏꦶ", "ꦄꦩꦺꦫꦶꦏ", "ꦨꦪꦸ", "ꦨꦒꦱ꧀", "ꦄꦫꦧ꧀", "ꦨꦶꦤ꧀ꦠꦁ", "ꦕꦤ꧀ꦢꦿ", "ꦄꦂꦓꦺꦤ꧀ꦠꦶꦤ", "ꦕꦤ꧀ꦢꦿꦭꦸꦑꦶꦠ", "ꦕꦺꦴꦑꦿꦺꦴ"]
+            },
+            "Level 7": {
+                latin: ["dzikir", "adzan", "Dzulhijah", "Dzulkaidah", "dzalim", "dzat", "udzur", "fajar", "fakir", "firasat"],
+                jawa:  ["ꦢ꦳ꦶꦏꦶꦂ", "ꦲꦢ꦳ꦤ꧀", "ꦢ꦳ꦸꦭ꧀ꦲꦶꦗꦃ", "ꦢ꦳ꦸꦭꦑꦲꦶꦢꦃ", "ꦢ꦳ꦭꦶꦩ꧀", "ꦢ꦳ꦠ꧀", "ꦲꦸꦢ꦳ꦸꦂ", "ꦥ꦳ꦗꦂ", "ꦥ꦳ꦏꦶꦂ", "ꦥ꦳ꦶꦫꦱꦠ꧀"]
+            },
+            "Level 8": {
+                latin: ["Berasku 25 kilo.", "Klambine 34 setel.", "Endhog 16 netes kabeh.", "Wedhuse 27 pasang.", "Kantore ing gang 18 nomer 9.", "Surabaya, 30 Juli 2026.", "Modhale 45 yuta.", "Saiki tanggal 17 Juni 2027.", "Lamongan, 3 Maret 1968.", "Bukune isih 84.", "95 sapi dikurbanake kabeh.", "53 woh jambu wis diundhuh."],
+                jawa:  ["꧋ꦧꦼꦫꦱ꧀ꦏꦸ꧇꧒꧕꧇ꦏꦶꦭꦺꦴ꧉", "꧋ꦏ꧀ꦭꦩ꧀ꦧꦶꦤꦺ꧇꧓꧔꧇ꦱꦼꦠꦺꦭ꧀꧈", "꧋ꦲꦼꦤ꧀ꦝꦺꦴꦒ꧀꧇꧑꧖꧇ꦤꦼꦠꦼꦱ꧀ꦏꦧꦺꦃ꧉", "꧋ꦮꦼꦝꦸꦱ꧀ꦱꦺ꧇꧒꧗꧇ꦥꦱꦁ꧉", "꧋ꦏꦤ꧀ꦠꦺꦴꦂꦫꦺꦲꦶꦁꦒꦁ꧇꧑꧘꧇ꦤꦺꦴꦩꦼꦂ꧇꧙꧉", "꧋ꦯꦸꦫꦧꦪ꧇꧓꧐꧇ꦗꦸꦭꦶ꧇꧒꧐꧒꧖꧉", "꧋ꦩꦺꦴꦝꦭ꧀ꦭꦺ꧇꧔꧕꧇ꦪꦸꦠ꧉", "꧋ꦱꦲꦶꦏꦶꦠꦁꦒꦭ꧀꧇꧑꧗꧇ꦗꦸꦤꦶ꧇꧒꧐꧒꧗꧉", "꧋ꦭꦩꦺꦴꦔꦤ꧀꧇꧓꧇ꦩꦉꦠ꧀꧇꧑꧙꧖꧘꧉", "꧋ꦧꦸꦏꦸꦤꦺꦲꦶꦱꦶꦃ꧇꧘꧔꧉", "꧋꧙꧕꧇ꦱꦥꦶꦢꦶꦏꦸꦂꦧꦤ꧀ꦤꦏꦺꦏꦧꦺꦃ꧉", "꧋꧕꧓꧇ꦮꦺꦴꦃꦗꦩ꧀ꦧꦸꦮꦶꦱ꧀ꦢꦶꦲꦸꦤ꧀ꦞꦸꦃ꧉"]
+            }
+        };
+
+        const jawaLettersPrimary = [
+            "ꦲ", "ꦤ", "ꦕ", "ꦫ", "ꦏ", 
+            "ꦢ", "ꦠ", "ꦱ", "ꦮ", "ꦭ", 
+            "ꦥ", "ꦝ", "ꦗ", "ꦪ", "ꦚ", 
+            "ꦩ", "ꦒ", "ꦧ", "ꦛ", "ꦔ", 
+            "ꦶ", "ꦸ", "ꦺ", "ꦺꦴ", "ꦼ", 
+            "ꦉ", "ꦊ", "ꦂ", "ꦁ", "ꦃ", 
+            "ꦿ", "ꦽ", "ꦾ", "​", "꧀"
         ];
 
-        let currentShift = 0;
-        function renderKeyboard() {
-            const board = document.getElementById("jawaBoard");
-            board.innerHTML = "";
-            const charList = keyboardPages[currentShift];
-            charList.forEach(char => {
-                const btn = document.createElement("button");
-                btn.className = "button";
-                btn.innerText = char;
-                btn.onclick = () => {
-                    playSoundTombol();
-                    document.getElementById("jawaWord").innerText += char;
-                };
-                board.appendChild(btn);
-            });
-            document.getElementById("shiftButton").innerText = `SHIFT ${currentShift + 1}`;
-        }
+        const jawaLettersSecondary = [
+            "ꦟ", "ꦑ", "ꦡ", "ꦯ", "ꦦ", 
+            "ꦘ", "ꦓ", "ꦨ", "", "", 
+            "ꦄ", "ꦆ", "ꦈ", "ꦌ", "ꦎ", 
+            "ꦏ꦳", "ꦥ꦳", "ꦢ꦳", "ꦗ꦳", "ꦒ꦳", 
+            "꧈", "꧉", "꧊", "꧋", "꧇", 
+            "꧑", "꧒", "꧓", "꧔", "꧕",
+            "꧖", "꧗", "꧘", "꧙", "꧐"
+        ];
 
-        document.getElementById("shiftButton").onclick = () => {
-            playSoundTombol();
-            currentShift = (currentShift + 1) % keyboardPages.length;
-            renderKeyboard();
-        };
+        // --- VARIABEL GAME ---
+        let namaSiswa = "";
+        let absenSiswa = "";
+        let kelasSiswa = "";
+        let levelSiswa = "";
 
-        document.getElementById("deleteButton").onclick = () => {
-            playSoundHapus();
-            let curr = document.getElementById("jawaWord").innerText;
-            document.getElementById("jawaWord").innerText = curr.slice(0, -1);
-        };
+        let activeLatinWords = [];
+        let activeJawaWords = [];
 
-        // Database Soal
-        const levelData = {
-            "Level 1": { latin: ["AJA", "ALA", "ANA", "NATA", "KARA"], jawa: ["ꦲꦗ", "ꦲꦭ", "ꦲꦤ", "ꦤꦠ", "ꦏꦫ"] },
-            "Level 2": { latin: ["ULA", "EKA", "NIKI", "DUKA"], jawa: ["ꦲꦸꦭ", "ꦲꦺꦏ", "ꦤꦶꦏꦶ", "ꦢꦸꦏ"] },
-            "Level 3": { latin: ["INGKANG", "NANGKA", "CUKUR"], jawa: ["ꦲꦶꦁꦏꦁ", "ꦤꦁꦏ", "ꦕꦸꦏꦸꦂ"] },
-            "Level 4": { latin: ["ABDI", "AMBA", "ASPAS"], jawa: ["ꦲꦧ꧀ꦢꦶ", "ꦲꦩ꧀ꦧ", "ꦲꦱ꧀ꦥꦭ꧀"] },
-            "Level 5": { latin: ["AMBROL", "ASRI", "BLAKA"], jawa: ["ꦲꦩ꧀ꦧꦿꦺꦴꦭ꧀", "ꦲꦱꦿꦶ", "ꦧ꧀ꦭꦏ"] },
-            "Level 6": { latin: ["BASUKI", "AMERIKA", "BAYU"], jawa: ["ꦨꦱꦸꦏꦶ", "ꦄꦩꦺꦫꦶꦏ", "ꦨꦪꦸ"] },
-            "Level 7": { latin: ["ZAKAT", "FAHAM", "GHOIB"], jawa: ["ꦗ꦳ꦏꦠ꧀", "ꦥ꦳ꦲꦩ꧀", "ꦒ꦳ꦺꦴꦲꦶꦧ꧀"] },
-            "Level 8": { latin: ["TAHUN 2026", "ANGKA 123"], jawa: ["ꦠꦲꦸꦤ꧀꧒꧖", "ꦲꦁꦏ꧑꧒꧓"] }
-        };
-
-        let currentQuestionIndex = 0;
+        let currentBoardMode = 1; 
+        let currentLatin = "";
+        let currentJawa = "";
+        let timeLeft = 60;
         let score = 0;
         let lives = 3;
-        let timerInterval = null;
-        let timeLeft = 60;
-        let activeQuestions = [];
+        let timer = null;
+        let totalQuestions = 0;
 
-        document.getElementById("startBtn").onclick = () => {
-            const name = document.getElementById("studentName").value.trim();
-            const absen = document.getElementById("studentAbsen").value;
-            const kelas = document.getElementById("studentKelas").value;
-            const level = document.getElementById("studentLevel").value;
-            const mode = document.getElementById("studentMode").value;
-            const pass = document.getElementById("teacherPass").value.trim();
+        const startScreen = document.getElementById("startScreen");
+        const gameContainer = document.getElementById("gameContainer");
+        const startBtn = document.getElementById("startBtn");
 
-            if (!name || !absen || !kelas || !level) {
-                alert("Harap lengkapi formulir terlebih dahulu!");
+        const latinWordEl = document.getElementById("latinWord");
+        const jawaWordEl = document.getElementById("jawaWord");
+        const timeEl = document.getElementById("time");
+        const scoreEl = document.getElementById("score");
+        const livesEl = document.getElementById("lives");
+        const jawaBoard = document.getElementById("jawaBoard");
+        const shiftButton = document.getElementById("shiftButton");
+
+        // TOMBOL MULAI MAIN
+        startBtn.addEventListener("pointerdown", (e) => {
+            triggerPressAnimation(e.target);
+            
+            const inputAbsen = document.getElementById("studentAbsen").value;
+            const inputName = document.getElementById("studentName").value.trim();
+            const inputKelas = document.getElementById("studentKelas").value;
+            const inputLevel = document.getElementById("studentLevel").value;
+            const inputMode = document.getElementById("studentMode").value;
+            const inputPass = document.getElementById("teacherPass").value.trim();
+
+            if (!inputAbsen || inputName === "" || !inputKelas || !inputLevel) {
+                showAlert("Nuwun sewu, isi No Absen, Nama, Kelas, lan Pilih Level rumiyin!");
                 return;
             }
 
-            if (mode === "Sumatif" && pass !== TOKEN_SUMATIF) {
-                alert("Token Ujian Salah!");
+            // Validasi khusus mode Sumatif
+            if (inputMode === "Sumatif" && (inputPass !== TOKEN_SUMATIF && inputPass !== activePassword)) {
+                showAlert("❌ Token Ujian Sumatif Salah! Hubungi guru Anda.");
                 return;
             }
 
-            document.getElementById("startScreen").style.display = "none";
-            document.getElementById("gameContainer").style.display = "block";
+            absenSiswa = inputAbsen;
+            namaSiswa = inputName;
+            kelasSiswa = inputKelas;
+            levelSiswa = inputLevel;
 
-            renderKeyboard();
-            initGame(level);
-        };
+            if (!levelData[levelSiswa]) {
+                showAlert("Level belum tersedia!");
+                return;
+            }
 
-        function initGame(level) {
+            // ACAK SOAL (DISESUAIKAN DENGAN TOTAL_SOAL_GAME DARI SETTING)[cite: 3]
+            let poolLatin = [...levelData[levelSiswa].latin];
+            let poolJawa = [...levelData[levelSiswa].jawa];
+
+            activeLatinWords = [];
+            activeJawaWords = [];
+
+            const jumlahSoal = Math.min(TOTAL_SOAL_GAME, poolLatin.length);
+
+            for (let i = 0; i < jumlahSoal; i++) {
+                const randomIndex = Math.floor(Math.random() * poolLatin.length);
+                activeLatinWords.push(poolLatin.splice(randomIndex, 1)[0]);
+                activeJawaWords.push(poolJawa.splice(randomIndex, 1)[0]);
+            }
+
+            totalQuestions = activeLatinWords.length;
+
+            startScreen.style.display = "none";
+            gameContainer.style.display = "block";
+            
+            startGame();
+        });
+
+        function chooseNewWord() {
+            if (activeLatinWords.length === 0) {
+                gameFinish();
+                return;
+            }
+            const index = Math.floor(Math.random() * activeLatinWords.length);
+            currentLatin = activeLatinWords.splice(index, 1)[0];
+            currentJawa = activeJawaWords.splice(index, 1)[0];            
+            latinWordEl.textContent = currentLatin;
+            jawaWordEl.textContent = "";
+        }
+
+        function renderBoard() {
+            jawaBoard.innerHTML = "";
+            const activeLetters = (currentBoardMode === 1) ? jawaLettersPrimary : jawaLettersSecondary;
+            
+            activeLetters.forEach(letter => {
+                const button = document.createElement("div");
+                button.className = "button";
+                button.textContent = letter;
+                
+                button.addEventListener("pointerdown", () => {
+                    triggerPressAnimation(button);
+                    jawaWordEl.textContent += letter;
+                    jawaWordEl.scrollTop = jawaWordEl.scrollHeight;
+                    playSoundTombol();
+                });
+                
+                jawaBoard.appendChild(button);
+            });
+        }
+
+        function updateLivesDisplay() {
+            let hearts = "";
+            for (let i = 0; i < lives; i++) {
+                hearts += "❤️";
+            }
+            livesEl.textContent = hearts || "-";
+        }
+
+        shiftButton.addEventListener("pointerdown", () => {
+            triggerPressAnimation(shiftButton);
+            playSoundTombol();
+            if (currentBoardMode === 1) {
+                currentBoardMode = 2;
+                shiftButton.textContent = "SHIFT 1";
+            } else {
+                currentBoardMode = 1;
+                shiftButton.textContent = "SHIFT 2";
+            }
+            renderBoard();
+        });
+
+        document.getElementById("confirmButton").addEventListener("pointerdown", (e) => {
+            triggerPressAnimation(e.target);
+            const inputUser = jawaWordEl.textContent.trim();
+            const kunciJawaban = currentJawa.trim();
+
+            if (inputUser === kunciJawaban) {
+                score++;
+                playSoundBenar();
+                scoreEl.textContent = `Skor: ${((score / totalQuestions) * 100).toFixed(1)}`;
+                chooseNewWord();
+            } else {
+                lives--;
+                playSoundSalah();
+                updateLivesDisplay();
+                if (lives <= 0) {
+                    gameOver();
+                }
+            }
+        });
+
+        document.getElementById("deleteButton").addEventListener("pointerdown", (e) => {
+            triggerPressAnimation(e.target);
+            let text = jawaWordEl.textContent;
+            if (text.length > 0) {
+                jawaWordEl.textContent = Array.from(text).slice(0, -1).join('');
+            }
+            playSoundHapus();
+        });
+
+        function startGame() {
             score = 0;
             lives = 3;
-            currentQuestionIndex = 0;
-            const data = levelData[level] || levelData["Level 1"];
-            activeQuestions = [];
-            
-            for(let i = 0; i < data.latin.length; i++) {
-                activeQuestions.push({ latin: data.latin[i], jawa: data.jawa[i] });
-            }
-            activeQuestions.sort(() => Math.random() - 0.5);
-            activeQuestions = activeQuestions.slice(0, TOTAL_SOAL_GAME);
+            timeLeft = GAME_TIMER; // Menggunakan batas waktu dinamis[cite: 3]
+            timeEl.textContent = `Wektu: ${timeLeft} s`;
 
-            updateHeader();
-            loadQuestion();
-            startTimer();
-        }
+            chooseNewWord();
+            renderBoard();
+            updateLivesDisplay();
 
-        function updateHeader() {
-            document.getElementById("score").innerText = `Skor: ${score}`;
-            document.getElementById("lives").innerText = "❤️".repeat(lives);
-        }
-
-        function startTimer() {
-            clearInterval(timerInterval);
-            timeLeft = GAME_TIMER;
-            document.getElementById("time").innerText = `Wektu: ${timeLeft} s`;
-            timerInterval = setInterval(() => {
+            clearInterval(timer);
+            timer = setInterval(() => {
                 timeLeft--;
-                document.getElementById("time").innerText = `Wektu: ${timeLeft} s`;
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    checkAnswer(true);
+                timeEl.textContent = `Wektu: ${timeLeft} s`;
+                if (timeLeft <= 0 || lives <= 0) {
+                    gameOver();
                 }
             }, 1000);
         }
-
-        function loadQuestion() {
-            if (currentQuestionIndex >= activeQuestions.length || lives <= 0) {
-                endGame();
+        
+        // PENGIRIMAN DATA KE GOOGLE SHEET
+        function sendDataToGoogleSheet(finalScore, gameStatus, statusElementId) {
+            const statusEl = document.getElementById(statusElementId);
+            const selectedMode = document.getElementById("studentMode").value;
+        
+            if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("https://script.google.com/macros/s/AKfycbz5lH1HdRwu2eXL2HQsBUD7lPTfUdbfmzGuEAX_Q5xw0Vc02fvOmBibIzgSzmAprA1Y/exec")) {
+                if (statusEl) statusEl.textContent = "(Data belum terhubung ke Google Sheet)";
                 return;
             }
-            document.getElementById("latinWord").innerText = activeQuestions[currentQuestionIndex].latin;
-            document.getElementById("jawaWord").innerText = "";
-            startTimer();
-        }
-
-        document.getElementById("confirmButton").onclick = () => {
-            checkAnswer(false);
-        };
-
-        function checkAnswer(isTimeout) {
-            clearInterval(timerInterval);
-            const userAns = document.getElementById("jawaWord").innerText.trim();
-            const correctAns = activeQuestions[currentQuestionIndex].jawa.trim();
-
-            if (!isTimeout && userAns === correctAns) {
-                playSoundBenar();
-                score += 10;
-            } else {
-                playSoundSalah();
-                lives--;
-            }
-
-            currentQuestionIndex++;
-            updateHeader();
-
-            if (lives <= 0 || currentQuestionIndex >= activeQuestions.length) {
-                endGame();
-            } else {
-                loadQuestion();
-            }
-        }
-
-        function endGame() {
-            clearInterval(timerInterval);
-            alert(`Permainan Selesai!\nSkor Akhir Anda: ${score}`);
-            
-            // Kirim Data Hasil Ke Google Sheets Cloud
+        
             const formData = new URLSearchParams();
             formData.append("action", "submit_score");
-            formData.append("nama", document.getElementById("studentName").value);
-            formData.append("absen", document.getElementById("studentAbsen").value);
-            formData.append("kelas", document.getElementById("studentKelas").value);
-            formData.append("level", document.getElementById("studentLevel").value);
-            formData.append("skor", score);
+            formData.append("absen", absenSiswa);
+            formData.append("nama", namaSiswa);
+            formData.append("kelas", kelasSiswa);
+            formData.append("level", levelSiswa);
+            formData.append("skor", finalScore);
+            formData.append("status", gameStatus);
+            formData.append("mode", selectedMode); 
+        
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: formData.toString()
+            })
+            .then(() => {
+                if (statusEl) statusEl.textContent = `✓ Nilai ${selectedMode} Berhasil Disimpan!`;
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                if (statusEl) statusEl.textContent = "❌ Gagal menyimpan data.";
+            });
+        }
 
-            fetch(GOOGLE_SCRIPT_URL, { method: "POST", body: formData })
-            .catch(err => console.log("Gagal menyimpan hasil nilai."));
+        function gameOver() {
+            clearInterval(timer);
+            gameContainer.style.display = "none";
+            const finalScore = ((score / totalQuestions) * 100).toFixed(1);
 
-            location.reload();
+            const gameOverMessage = document.createElement("div");
+            gameOverMessage.style.position = "fixed";
+            gameOverMessage.style.top = "50%";
+            gameOverMessage.style.left = "50%";
+            gameOverMessage.style.transform = "translate(-50%, -50%)";
+            gameOverMessage.style.backgroundColor = "#FFC4C4";
+            gameOverMessage.style.padding = "20px";
+            gameOverMessage.style.boxShadow = "0 4px 10px rgba(0, 0, 0, 0.3)";
+            gameOverMessage.style.textAlign = "center";
+            gameOverMessage.style.borderRadius = "12px";
+            gameOverMessage.style.width = "85%";
+            gameOverMessage.style.maxWidth = "320px";
+            gameOverMessage.innerHTML = `
+                <h1 style="margin-top:0; font-size: 24px;">Game Over</h1>
+                <hr style="margin: 10px 0;">
+                <p style="font-size: 14px; margin: 4px 0;"><strong>No. Absen:</strong> ${absenSiswa}</p>
+                <p style="font-size: 14px; margin: 4px 0;"><strong>Nama:</strong> ${namaSiswa}</p>
+                <p style="font-size: 14px; margin: 4px 0;"><strong>Kelas:</strong> ${kelasSiswa}</p>
+                <p style="font-size: 14px; margin: 4px 0;"><strong>Level:</strong> ${levelSiswa}</p>
+                <h2 style="font-size: 15px; margin-top: 8px;">Skor Anda:</h2>
+                <h1 style="font-size: 38px; color: #A00101; margin: 4px 0;">${finalScore}</h1>
+                <div class="sending-status" id="sendStatus">Menyimpan nilai ke Google Sheet...</div>
+                <h3 style="margin-top: 12px; font-size: 15px;">Refresh halaman untuk main maneh!</h3>
+            `;
+            playSoundGameOver();
+            document.body.appendChild(gameOverMessage);
+
+            sendDataToGoogleSheet(finalScore, "Game Over", "sendStatus");
+        }
+
+        function gameFinish() {
+            clearInterval(timer);
+            gameContainer.style.display = "none";
+            const finalScore = ((score / totalQuestions) * 100).toFixed(1);
+
+            const gameFinishMessage = document.createElement("div");
+            gameFinishMessage.style.position = "fixed";
+            gameFinishMessage.style.top = "50%";
+            gameFinishMessage.style.left = "50%";
+            gameFinishMessage.style.transform = "translate(-50%, -50%)";
+            gameFinishMessage.style.backgroundColor = "#CCF7F5";
+            gameFinishMessage.style.padding = "20px";
+            gameFinishMessage.style.boxShadow = "0 4px 10px rgba(0, 0, 0, 0.3)";
+            gameFinishMessage.style.textAlign = "center";
+            gameFinishMessage.style.borderRadius = "12px";
+            gameFinishMessage.style.width = "85%";
+            gameFinishMessage.style.maxWidth = "320px";
+            gameFinishMessage.innerHTML = `
+                <h1 style="margin-top:0; font-size: 24px;">Game Finish</h1>
+                <hr style="margin: 10px 0;">
+                <p style="font-size: 14px; margin: 4px 0;"><strong>No. Absen:</strong> ${absenSiswa}</p>
+                <p style="font-size: 14px; margin: 4px 0;"><strong>Nama:</strong> ${namaSiswa}</p>
+                <p style="font-size: 14px; margin: 4px 0;"><strong>Kelas:</strong> ${kelasSiswa}</p>
+                <p style="font-size: 14px; margin: 4px 0;"><strong>Level:</strong> ${levelSiswa}</p>
+                <h2 style="font-size: 15px; margin-top: 8px;">Skor Anda:</h2>
+                <h1 style="font-size: 38px; color: #055205; margin: 4px 0;">${finalScore}</h1>
+                <div class="sending-status" id="sendStatus">Menyimpan nilai ke Google Sheet...</div>
+                <h3 style="margin-top: 12px; font-size: 15px;">Refresh halaman untuk main maneh!</h3>
+            `;
+            playSoundFinish();
+            document.body.appendChild(gameFinishMessage);
+
+            sendDataToGoogleSheet(finalScore, "Finish", "sendStatus");
+        }
+
+        function showAlert(message) {
+            const modal = document.getElementById("customAlertModal");
+            const msgElem = document.getElementById("customAlertMessage");
+            const btn = document.getElementById("customAlertBtn");
+        
+            msgElem.innerText = message;
+            modal.style.display = "flex";
+        
+            btn.onclick = function() {
+                modal.style.display = "none";
+            };
         }
     </script>
+
+    <!-- Modal Peringatan Kustom -->
+    <div id="customAlertModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: #fff; padding: 20px; border-radius: 10px; max-width: 300px; width: 80%; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+            <p id="customAlertMessage" style="font-size: 16px; font-weight: bold; margin-bottom: 20px; color: #333;"></p>
+            <button id="customAlertBtn" style="padding: 8px 20px; background-color: #055205; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">OK</button>
+        </div>
+    </div>
 </body>
 </html>
