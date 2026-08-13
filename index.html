@@ -296,7 +296,7 @@
     <!-- HALAMAN AWAL (FORM IDENTITAS) -->
     <div class="start-screen" id="startScreen">
         <!-- Judul diberi ID untuk deteksi 5 kali ketukan -->
-        <h1 id="gameTitle">Gamiu Nulis Jawa</h1>
+        <h1 id="gameTitle">Gamiuo Nulis Jawa</h1>
         <h2>Isi Identitas & Pilih Level</h2>
         <form id="studentForm">
             <!-- 1. Nomor Absen Dropdown -->
@@ -483,59 +483,59 @@
         });
 
         // Tombol Simpan Pengaturan Baru (Password, Waktu, & Jumlah Soal ke Apps Script)[cite: 3]
+        // Tombol Simpan Pengaturan Baru (Dioptimalkan agar Alert Langsung Muncul)
         document.getElementById("savePassBtn").addEventListener("click", () => {
             const oldPass = document.getElementById("oldPassInput").value.trim();
             const newPass = document.getElementById("newPassInput").value.trim();
             const newTime = document.getElementById("gameTimerInput").value.trim();
             const newQuestions = document.getElementById("totalQuestionsInput").value.trim();
-
+        
             // Verifikasi password lama
             if (oldPass !== TOKEN_SUMATIF && oldPass !== activePassword) {
                 showAlert("❌ Password lama salah!");
                 return;
             }
-
+        
             if (!newTime || !newQuestions || Number(newTime) <= 0 || Number(newQuestions) <= 0) {
                 showAlert("⚠️ Batas waktu dan jumlah soal harus diisi angka positif!");
                 return;
             }
-
-            // Tampilkan info sedang menyimpan
-            showAlert("⏳ Sedang memperbarui pengaturan ke Cloud Server...");
-
+        
+            // Prepare Data
             const formData = new URLSearchParams();
             formData.append("action", "update_settings");
             formData.append("new_password", newPass !== "" ? newPass : activePassword);
             formData.append("new_waktu", newTime);
             formData.append("new_jumlah_soal", newQuestions);
-
-            fetch(GOOGLE_SCRIPT_URL, {
-                method: "POST",
-                mode: "no-cors",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: formData.toString()
-            })
-            .then(() => {
-                if (newPass !== "") {
-                    TOKEN_SUMATIF = newPass;
-                    activePassword = newPass;
-                }
-                GAME_TIMER = Number(newTime);
-                TOTAL_SOAL_GAME = Number(newQuestions);
-
-                showAlert("✅ Pengaturan (Password, Waktu, Soal) berhasil diperbarui secara ONLINE!");
-                
-                // Bersihkan input dan tutup modal
-                document.getElementById("oldPassInput").value = "";
-                document.getElementById("newPassInput").value = "";
-                passwordModal.style.display = "none";
-            })
-            .catch(err => {
-                showAlert("❌ Gagal memperbarui pengaturan ke server. Periksa koneksi internet.");
-                console.error("Error:", err);
-            });
+        
+            // 1. Langsung perbarui nilai di lokal (Aplikasi Game) tanpa menunggu respon server
+            if (newPass !== "") {
+                TOKEN_SUMATIF = newPass;
+                activePassword = newPass;
+            }
+            GAME_TIMER = Number(newTime);
+            TOTAL_SOAL_GAME = Number(newQuestions);
+        
+            // 2. Kirim data ke Google Sheets menggunakan sendBeacon (Sangat cepat & Tanpa Latency)
+            const blob = new Blob([formData.toString()], { type: 'application/x-www-form-urlencoded' });
+            
+            if (navigator.sendBeacon) {
+                navigator.sendBeacon(GOOGLE_SCRIPT_URL, blob);
+            } else {
+                // Fallback jika browser sangat lama
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: formData.toString()
+                });
+            }
+        
+            // 3. Tampilkan Alert & Tutup Modal Seketika!
+            showAlert("✅ Pengaturan berhasil diperbarui secara ONLINE!");
+            document.getElementById("oldPassInput").value = "";
+            document.getElementById("newPassInput").value = "";
+            passwordModal.style.display = "none";
         });
 
         // Tombol Batal Modal
