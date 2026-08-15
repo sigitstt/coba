@@ -478,10 +478,10 @@
                 document.getElementById("totalQuestionsInput").value = TOTAL_SOAL_GAME;
                 passwordModal.style.display = "flex";
             } else {
-                // Reset hitungan jika jeda mengetuk lebih dari 1.5 detik
+                // Reset hitungan jika jeda mengetuk lebih dari 0.3 detik
                 tapTimer = setTimeout(() => {
                     titleTapCount = 0;
-                }, 1500);
+                }, 300);
             }
         });
 
